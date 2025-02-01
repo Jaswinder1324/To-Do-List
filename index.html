@@ -1,0 +1,95 @@
+<!-- /todo list -->  
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Document</title>  
+    <link rel="stylesheet" href="style.css">  
+</head>  
+<body>  
+    <div class="container">  
+        <header>  
+            <h1>To-Do List</h1>  
+            <input type="text" id="taskInput" placeholder="Add a task...">  
+            <button id="addTaskButton" onclick="addTask()">Add Task</button>  
+            <ul id="taskList"></ul>  
+        </header>  
+    </div>  
+
+    <script>  
+        const taskInput = document.getElementById("taskInput");  
+        const addTaskButton = document.getElementById("addTaskButton");  
+        const taskList = document.getElementById("taskList");  
+        
+        const addTask = () => {
+            const task = taskInput.value.trim();
+            if (task) {
+                const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+                tasks.push(task);
+
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+                taskInput.value = ""
+                loadTasks();
+            }
+            else {
+                alert("Please enter some tasks")
+            }
+        }
+
+        //read tasks
+        const loadTasks = () => {  
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];  
+            taskList.innerHTML = "";  
+            tasks.forEach((task, index) => {  
+                const li = document.createElement("li");  
+                li.textContent = task;  
+
+                const delButton = document.createElement("button");  
+                delButton.textContent = "Delete";  
+                delButton.onclick = () => {  
+                    deleteTask(index);
+                };  
+
+                const updButton = document.createElement("button");  
+                updButton.textContent = "Update";  
+                updButton.onclick = () => {  
+                    editTask(index);
+                };  
+
+                li.appendChild(delButton);  
+                li.appendChild(updButton);  
+                taskList.appendChild(li);  
+            });  
+        };
+    
+
+        //delete tasks
+        const deleteTask = (index)=>
+        {
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+                
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();  //update the list after deletion
+        }  
+
+
+        //uodate task
+        const editTask = (index)=>{
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            const updtask = prompt("Enter new task", tasks[index]);
+            if(updtask!=null){
+                tasks[index] = updTask.trim();
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+                loadTasks(); //update the list after update
+            }
+
+        }
+       
+        
+        // Load tasks when the page loads  
+        window.onload = loadTasks;
+    </script>  
+</body>  
+</html>
