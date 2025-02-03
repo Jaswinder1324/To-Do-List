@@ -1,4 +1,4 @@
-<!-- /todo list -->  
+<!-- Your existing HTML structure, just adding checkbox to the loadTasks function -->
 <!DOCTYPE html>  
 <html lang="en">  
 <head>  
@@ -18,77 +18,110 @@
     </div>  
 
     <script>  
-        const taskInput = document.getElementById("taskInput");  
-        const addTaskButton = document.getElementById("addTaskButton");  
-        const taskList = document.getElementById("taskList");  
-        
+        const taskInput = document.getElementById("taskInput");
+        const addTaskButton = document.getElementById("addTaskButton");
+        const taskList = document.getElementById("taskList");
+
         const addTask = () => {
             const task = taskInput.value.trim();
-            if (task) {
+            if(task) {
                 const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-                tasks.push(task);
+                tasks.push({
+                    text: task,
+                    completed: false  // Adding completed property
+                });
 
                 localStorage.setItem("tasks", JSON.stringify(tasks));
-                taskInput.value = ""
+                taskInput.value = "";
                 loadTasks();
-            }
-            else {
-                alert("Please enter some tasks")
+            } else {
+                alert("Please enter some tasks");
             }
         }
 
-        //read tasks
-        const loadTasks = () => {  
-            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];  
-            taskList.innerHTML = "";  
-            tasks.forEach((task, index) => {  
-                const li = document.createElement("li");  
-                li.textContent = task;  
-
-                const delButton = document.createElement("button");  
-                delButton.textContent = "Delete";  
-                delButton.onclick = () => {  
-                    deleteTask(index);
-                };  
-
-                const updButton = document.createElement("button");  
-                updButton.textContent = "Update";  
-                updButton.onclick = () => {  
-                    editTask(index);
-                };  
-
-                li.appendChild(delButton);  
-                li.appendChild(updButton);  
-                taskList.appendChild(li);  
-            });  
-        };
-    
-
-        //delete tasks
-        const deleteTask = (index)=>
-        {
+        const loadTasks = () => {
             const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            taskList.innerHTML = "";
+            tasks.forEach((task, index) => {
+                const li = document.createElement("li");
                 
+                // Create checkbox
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.checked = task.completed;
+                checkbox.onchange = () => toggleTask(index);
+                
+                // Create task text span
+                const taskText = document.createElement("span");
+                taskText.textContent = task.text || task; // Handle both new and old data structure
+                if(task.completed) {
+                    taskText.classList.add("completed");
+                }
+
+                // Create button container
+                const buttonContainer = document.createElement("div");
+                buttonContainer.classList.add("button-container");
+
+                const delButton = document.createElement("button");
+                delButton.textContent = "Delete";
+                delButton.onclick = () => deleteTask(index);
+
+                const updButton = document.createElement("button");
+                updButton.textContent = "Update";
+                updButton.onclick = () => editTask(index);
+
+                buttonContainer.appendChild(delButton);
+                buttonContainer.appendChild(updButton);
+
+                li.appendChild(checkbox);
+                li.appendChild(taskText);
+                li.appendChild(buttonContainer);
+                taskList.appendChild(li);
+            });
+        };
+
+        // Add new toggle function
+        const toggleTask = (index) => {
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            if (typeof tasks[index] === 'string') {
+                // Convert old format to new format
+                tasks[index] = {
+                    text: tasks[index],
+                    completed: true
+                };
+            } else {
+                tasks[index].completed = !tasks[index].completed;
+            }
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            loadTasks();
+        }
+
+        const deleteTask = (index) => {
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
             tasks.splice(index, 1);
             localStorage.setItem("tasks", JSON.stringify(tasks));
-            loadTasks();  //update the list after deletion
-        }  
-
-
-        //uodate task
-        const editTask = (index)=>{
-            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-            const updtask = prompt("Enter new task", tasks[index]);
-            if(updtask!=null){
-                tasks[index] = updTask.trim();
-                localStorage.setItem("tasks", JSON.stringify(tasks));
-                loadTasks(); //update the list after update
-            }
-
+            loadTasks();
         }
-       
-        
-        // Load tasks when the page loads  
+
+        const editTask = (index) => {
+            const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            const currentTask = tasks[index].text || tasks[index];
+            const updTask = prompt("Enter the updated value", currentTask);
+            if(updTask != null) {
+                if (typeof tasks[index] === 'string') {
+                    tasks[index] = {
+                        text: updTask.trim(),
+                        completed: false
+                    };
+                } else {
+                    tasks[index].text = updTask.trim();
+                }
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+                loadTasks();
+            }
+        }
+
         window.onload = loadTasks;
     </script>  
 </body>  
